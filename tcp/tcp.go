@@ -12,6 +12,8 @@ const (
 	CONN_TYPE = "tcp4"
 )
 
+// all bullshit code, ignore for now
+
 func xd() {
 	// Listen for incoming connections.
 	l, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)

@@ -1,21 +1,6 @@
 package main
 
-import "reciever-ms/trackers/gt06"
-
 func main() {
-	d := gt06.Gt06Decoder{}
-
-	login := []byte{
-		0x78, 0x78,
-		0x0D,
-		0x01,
-		0x01, 0x23, 0x45, 0x67, 0x89, 0x01, 0x23, 0x45,
-		0x00, 0x01,
-		0x8C, 0xDD,
-		0x0D, 0x0A,
-	}
-
-	d.Decode(login)
 	// TODO !
-	// http.ListenAndServe(":3003", nil)
+	// instantiate server
 }
