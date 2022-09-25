@@ -109,7 +109,7 @@ func (m *Gt06Msg) DecodeLogin(debug bool) (res []byte, err error) {
 	if debug {
 		s := dstrings.BytesAsLiteralString(m.InformationContent)
 		imei := strings.TrimLeft(s, "0")
-		fmt.Printf("login message information content is the imei: %s", imei)
+		fmt.Printf("\nlogin message information content is the imei: %s", imei)
 	}
 
 	crcBytes := arrays.ConcatAppend([][]byte{

@@ -1,16 +1,13 @@
 package gt06
 
 import (
+	"errors"
 	"fmt"
 )
 
-// Manual reference: http://iconcox.in/images/gt-ognProtocol.pdf
-
-type Gt06Decoder struct {
-	debugMode bool
-}
-
 /*
+ | Manual reference: http://iconcox.in/images/gt-ognProtocol.pdf
+ |
  | Data Packet Format (10+N bytes)
  |
  | Format                    | Length (bytes)
@@ -67,25 +64,38 @@ var (
 	CMD_INFORMATION                   = uint8(0x80)
 )
 
-func (d *Gt06Decoder) printfIfDebug(s string, a ...any) {
+type decoder struct {
+	debugMode bool
+}
+
+func NewDecoder(debug bool) decoder {
+	return decoder{debugMode: debug}
+}
+
+func (d *decoder) printfIfDebug(s string, a ...any) {
 	if d.debugMode {
 		fmt.Printf(s, a...)
 	}
 }
 
-func (d *Gt06Decoder) Decode(msg []byte) {
+func (d *decoder) err(s string, a ...any) error {
+	ss := fmt.Sprintf(s, a...)
+	d.printfIfDebug(ss)
+	return errors.New(ss)
+}
+
+func (d *decoder) Decode(msg []byte) (res []byte, err error) {
 	d.printfIfDebug("decoding GT06 message")
 
 	m, err := NewGt06Msg(msg)
 	if err != nil {
-		d.printfIfDebug("decoding failed: %v", err)
-		return
+		return nil, d.err("decoding failed: %v", err)
 	}
 
 	switch m.ProtocolNumber[0] {
 	case LOGIN_MESSAGE:
-		m.DecodeLogin(d.debugMode)
+		return m.DecodeLogin(d.debugMode)
 	default:
-		d.printfIfDebug("cannot decode message content, unkown protocol number %d", m.ProtocolNumber)
+		return nil, d.err("cannot decode msg, unkown protocol %d", m.ProtocolNumber)
 	}
 }
