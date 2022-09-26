@@ -2,6 +2,8 @@ package tracer
 
 import (
 	"context"
+	"log"
+	"time"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -14,32 +16,21 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-type ITracer interface {
-	SetGlobalTracer(serviceName string, exportAddress string, exportPort string) error
-	NewSpan(ctx context.Context, tracerName string, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span)
-	SpanFromContext(ctx context.Context) trace.Span
-	AddSpanTags(span trace.Span, tags map[string]string)
-	AddSpanEvents(span trace.Span, name string, events map[string]string)
-	AddSpanError(span trace.Span, err error)
-	FailSpan(span trace.Span, msg string)
-}
-
-type TracerConfig struct {
+type Config struct {
 	ServiceName    string
 	ExportEndpoint string
 }
 
-func SetGlobalTracer(c *TracerConfig) error {
-	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(
-		jaeger.WithEndpoint(c.ExportEndpoint),
-	))
+var tp *tracesdk.TracerProvider
 
+func SetGlobalTracer(c *Config) error {
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(c.ExportEndpoint)))
 	if err != nil {
 		return err
 	}
 
-	tp := tracesdk.NewTracerProvider(
-		tracesdk.WithBatcher(exporter),
+	tp = tracesdk.NewTracerProvider(
+		tracesdk.WithBatcher(exp),
 		tracesdk.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceNameKey.String(c.ServiceName),
@@ -52,9 +43,23 @@ func SetGlobalTracer(c *TracerConfig) error {
 	return nil
 }
 
+func Stop(ctx context.Context) {
+	if tp == nil {
+		return
+	}
+
+	// Do not make the application hang when it is shutdown.
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	if err := tp.Shutdown(ctx); err != nil {
+		log.Fatal(err)
+	}
+}
+
 // NewSpan returns a new span from the global tracer. Each resulting
-// span must be completed with `defer span.End()` right after the call.
-func NewSpan(ctx context.Context, tracerName string, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
+// span should call `span.End()`, ideally with `defer span.End()`.
+func NewSpan(ctx context.Context, tracerName, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
 	if opts == nil {
 		return otel.Tracer(tracerName).Start(ctx, spanName)
 	}
@@ -89,11 +94,11 @@ func AddSpanTags(span trace.Span, tags map[string]string) {
 // AddSpanEvents adds a new events to the span. It will appear under the "Logs"
 // section of the selected span. Use this if the event could mean anything
 // valuable while debugging.
-func AddSpanEvents(span trace.Span, name string, events map[string]string) {
-	list := make([]trace.EventOption, len(events))
+func AddSpanEvent(span trace.Span, name string, attributes map[string]string) {
+	list := make([]trace.EventOption, len(attributes))
 
 	var i int
-	for k, v := range events {
+	for k, v := range attributes {
 		list[i] = trace.WithAttributes(attribute.Key(k).String(v))
 		i++
 	}

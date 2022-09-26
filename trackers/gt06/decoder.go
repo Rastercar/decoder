@@ -96,7 +96,7 @@ func (d *decoder) Decode(msg []byte) DecodeRes {
 
 	m, err := NewGt06Msg(msg)
 	if err != nil {
-		d.printfIfDebug("decoding failed: %v", err)
+		d.printfIfDebug("\ndecoding failed: %v", err)
 		return DecodeRes{Err: d.err("decoding failed: %v", err)}
 	}
 
@@ -110,7 +110,7 @@ func (d *decoder) Decode(msg []byte) DecodeRes {
 	}
 
 	if res.Err != nil {
-		d.printfIfDebug("decoding failed: %v", err)
+		d.printfIfDebug("\ndecoding failed: %v", err)
 	}
 
 	return res

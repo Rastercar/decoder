@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reciever-ms/tracer"
 	"reciever-ms/trackers/gt06"
@@ -17,11 +18,19 @@ func castDecodeRes[T any](d *gt06.DecodeRes) (*T, error) {
 }
 
 // here we should have rastercar bussiness logic, such as publishing recieved positions to rmq, etc...
-func handleDecodedMsg(d *gt06.DecodeRes) {
+func handleDecodedMsg(ctx context.Context, d *gt06.DecodeRes) {
 	switch d.MsgType {
 	case "LocationRes":
 		// TODO:
 	}
+
+	// TODO: rm me
+	println("handle decoded")
+
+	_, span := tracer.NewSpan(ctx, "fn", "handleDecodedMsg")
+	defer span.End()
+
+	span.AddEvent("some event")
 }
 
 type Session struct {
@@ -32,21 +41,29 @@ type Session struct {
 }
 
 func (s *Session) handlePackets(packets []byte) (res []byte, err error) {
-	// TODO: fixme (do not use jhoy code)
-	_, span := tracer.NewSpan(context.Background(), "tcp", "meh")
+	ctx, span := tracer.NewSpan(context.TODO(), "fn", "handlePackets")
 	defer span.End()
+
+	if s.Imei != "" {
+		tracer.AddSpanTags(span, map[string]string{"imei": s.Imei})
+	}
 
 	decRes := decoder.Decode(packets)
 	if decRes.Err != nil {
-		// TODO-JAEGER: log the decode error
 		s.InvalidMsgCnt++
 
 		if s.InvalidMsgCnt >= MAX_INVALID_MESSAGES_PER_CONN {
-			return nil, fmt.Errorf("invalid message count above limit of: %d", MAX_INVALID_MESSAGES_PER_CONN)
+			errMsg := fmt.Sprintf("invalid message count above limit of: %d", MAX_INVALID_MESSAGES_PER_CONN)
+
+			tracer.AddSpanErrorAndFail(span, err, errMsg)
+			return nil, errors.New(errMsg)
 		}
 
+		tracer.AddSpanError(span, err)
 		return nil, nil
 	}
+
+	tracer.AddSpanTags(span, map[string]string{"msg_type": decRes.MsgType})
 
 	if decRes.MsgType == "LoginRes" {
 		r, err := castDecodeRes[gt06.LoginRes](&decRes)
@@ -55,6 +72,7 @@ func (s *Session) handlePackets(packets []byte) (res []byte, err error) {
 		}
 
 		s.Imei = r.Imei
+		tracer.AddSpanTags(span, map[string]string{"imei": s.Imei})
 
 		return decRes.Res, nil
 	}
@@ -63,11 +81,13 @@ func (s *Session) handlePackets(packets []byte) (res []byte, err error) {
 	// as we cant know what tracker send the message, therefore the
 	// information would be pointless to us
 	if s.Imei == "" {
-		// TODO-JAEGER: log bellow
-		return nil, fmt.Errorf("despite ok msg of type: %s the imei has not been set by a login packet previously", decRes.MsgType)
+		errMsg := fmt.Sprintf("despite ok msg of type: %s the imei has not been set by a login packet previously", decRes.MsgType)
+
+		tracer.AddSpanErrorAndFail(span, err, errMsg)
+		return nil, errors.New(errMsg)
 	}
 
-	go handleDecodedMsg(&decRes)
+	go handleDecodedMsg(ctx, &decRes)
 
 	return decRes.Res, nil
 }

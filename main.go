@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -8,8 +9,8 @@ import (
 	"reciever-ms/tracer"
 )
 
-func initTracing() {
-	cfg := tracer.TracerConfig{
+func startTracer() {
+	cfg := tracer.Config{
 		ServiceName:    "positions-ms",
 		ExportEndpoint: "http://localhost:14268/api/traces",
 	}
@@ -20,7 +21,11 @@ func initTracing() {
 }
 
 func main() {
-	initTracing()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	startTracer()
+	defer tracer.Stop(ctx)
 
 	err := tcp.Listen("localhost:3003", tcp.HandleRequest)
 	if err != nil {
