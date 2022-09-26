@@ -99,18 +99,16 @@ func NewGt06Msg(packets []byte) (*Gt06Msg, error) {
 	}, nil
 }
 
-func (m *Gt06Msg) DecodeLogin(debug bool) (res []byte, err error) {
-	// here we can decode the message on the information content field
-	// and we can also return the byte array of the response
+type LoginRes struct {
+	Imei string `json:"imei"`
+}
 
+func (m *Gt06Msg) DecodeLogin() DecodeRes {
 	// always 5 in the login response
 	PACKET_LEN := []byte{0x05}
 
-	if debug {
-		s := dstrings.BytesAsLiteralString(m.InformationContent)
-		imei := strings.TrimLeft(s, "0")
-		fmt.Printf("\nlogin message information content is the imei: %s", imei)
-	}
+	s := dstrings.BytesAsLiteralString(m.InformationContent)
+	imei := strings.TrimLeft(s, "0")
 
 	crcBytes := arrays.ConcatAppend([][]byte{
 		PACKET_LEN,
@@ -129,5 +127,10 @@ func (m *Gt06Msg) DecodeLogin(debug bool) (res []byte, err error) {
 		STOP_BIT,
 	})
 
-	return response, nil
+	return DecodeRes{
+		Err:     nil,
+		Res:     response,
+		Msg:     LoginRes{Imei: imei},
+		MsgType: "LoginRes",
+	}
 }

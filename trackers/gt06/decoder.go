@@ -68,6 +68,13 @@ type decoder struct {
 	debugMode bool
 }
 
+type DecodeRes struct {
+	Err     error       // the decoding error
+	Res     []byte      // bytes to respond to the tracker through tcp/udp
+	Msg     interface{} // nil or a serializable struct with data about the decode response
+	MsgType string      // name of the struct in msg
+}
+
 func NewDecoder(debug bool) decoder {
 	return decoder{debugMode: debug}
 }
@@ -84,18 +91,27 @@ func (d *decoder) err(s string, a ...any) error {
 	return errors.New(ss)
 }
 
-func (d *decoder) Decode(msg []byte) (res []byte, err error) {
+func (d *decoder) Decode(msg []byte) DecodeRes {
 	d.printfIfDebug("decoding GT06 message")
 
 	m, err := NewGt06Msg(msg)
 	if err != nil {
-		return nil, d.err("decoding failed: %v", err)
+		d.printfIfDebug("decoding failed: %v", err)
+		return DecodeRes{Err: d.err("decoding failed: %v", err)}
 	}
+
+	var res DecodeRes
 
 	switch m.ProtocolNumber[0] {
 	case LOGIN_MESSAGE:
-		return m.DecodeLogin(d.debugMode)
+		res = m.DecodeLogin()
 	default:
-		return nil, d.err("cannot decode msg, unkown protocol %d", m.ProtocolNumber)
+		res = DecodeRes{Err: d.err("cannot decode msg, unkown protocol %d", m.ProtocolNumber)}
 	}
+
+	if res.Err != nil {
+		d.printfIfDebug("decoding failed: %v", err)
+	}
+
+	return res
 }

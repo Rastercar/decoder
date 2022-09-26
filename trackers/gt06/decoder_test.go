@@ -24,12 +24,12 @@ func TestDecodeLogin(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	res, err := m.DecodeLogin(false)
-	if err != nil {
+	res := m.DecodeLogin()
+	if res.Err != nil {
 		t.Fatal(err)
 	}
 
-	if !bytes.Equal(res, expectedRes) {
+	if !bytes.Equal(res.Res, expectedRes) {
 		t.Fatal("response does not match expected !")
 	}
 }
