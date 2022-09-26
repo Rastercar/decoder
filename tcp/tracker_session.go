@@ -33,7 +33,7 @@ type Session struct {
 
 func (s *Session) handlePackets(packets []byte) (res []byte, err error) {
 	// TODO: fixme (do not use jhoy code)
-	_, span := tracer.Tracer.NewSpan(context.Background(), "tcp", "meh")
+	_, span := tracer.NewSpan(context.Background(), "tcp", "meh")
 	defer span.End()
 
 	decRes := decoder.Decode(packets)

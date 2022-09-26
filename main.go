@@ -9,11 +9,12 @@ import (
 )
 
 func initTracing() {
-	err := tracer.Tracer.SetGlobalTracer(&tracer.TracerConfig{
+	cfg := tracer.TracerConfig{
 		ServiceName:    "positions-ms",
 		ExportEndpoint: "http://localhost:14268/api/traces",
-	})
-	if err != nil {
+	}
+
+	if err := tracer.SetGlobalTracer(&cfg); err != nil {
 		log.Fatalf("[TRACER] failed to init tracer: %v", err)
 	}
 }

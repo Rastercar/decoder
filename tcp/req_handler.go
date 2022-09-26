@@ -22,7 +22,7 @@ func HandleRequest(c net.Conn) {
 
 		if err != nil {
 			c.Close()
-			return
+			break
 		}
 
 		req := buf[:n]
@@ -30,7 +30,7 @@ func HandleRequest(c net.Conn) {
 
 		if err != nil {
 			c.Close()
-			return
+			break
 		}
 
 		if res != nil {

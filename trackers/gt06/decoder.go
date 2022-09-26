@@ -92,7 +92,7 @@ func (d *decoder) err(s string, a ...any) error {
 }
 
 func (d *decoder) Decode(msg []byte) DecodeRes {
-	d.printfIfDebug("decoding GT06 message")
+	d.printfIfDebug("\ndecoding GT06 message")
 
 	m, err := NewGt06Msg(msg)
 	if err != nil {
