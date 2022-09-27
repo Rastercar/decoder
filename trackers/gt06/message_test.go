@@ -1,30 +1,17 @@
 package gt06
 
 import (
+	"math"
 	"reciever-ms/utils/arrays"
 	"reflect"
 	"testing"
 )
 
-var (
-	startBit      = []byte{0x78, 0x78}
-	packetLen     = []byte{0x0D}
-	protocolNum   = []byte{0x01}
-	terminalId    = []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0x01, 0x23, 0x45}
-	infoSerialNum = []byte{0x00, 0x01}
-	errCheck      = []byte{0x8C, 0xDD}
-	stopBit       = []byte{0x0D, 0x0A}
-)
+const float64EqualityThreshold = 1e-8
 
-var loginMessage = arrays.ConcatAppend([][]byte{
-	startBit,
-	packetLen,
-	protocolNum,
-	terminalId,
-	infoSerialNum,
-	errCheck,
-	stopBit,
-})
+func almostEqual(a, b float64) bool {
+	return math.Abs(a-b) <= float64EqualityThreshold
+}
 
 func TestValidateAndSetMessageSize(t *testing.T) {
 	t.Run("returns error if message is too small to contain packet length", func(t *testing.T) {
@@ -156,8 +143,8 @@ func TestValidateSelf(t *testing.T) {
 	})
 }
 
-func TestNewGt06Msg(t *testing.T) {
-	msg, err := NewGt06Msg(loginMessage)
+func TestNewMsg(t *testing.T) {
+	msg, err := NewMsg(loginMessage)
 	if err != nil {
 		t.Fatalf("unknonw error on valid message: %v", err)
 	}

@@ -19,7 +19,7 @@ func TestDecodeLogin(t *testing.T) {
 
 	expectedRes := []byte{0x78, 0x78, 0x05, 0x01, 0x00, 0x01, 0xD9, 0xDC, 0x0D, 0x0A}
 
-	m, err := NewGt06Msg(loginMsg)
+	m, err := NewMsg(loginMsg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,6 +27,15 @@ func TestDecodeLogin(t *testing.T) {
 	res := m.DecodeLogin()
 	if res.Err != nil {
 		t.Fatal(err)
+	}
+
+	if res.MsgType != "LoginRes" {
+		t.Fatal("invalid msg type")
+	}
+
+	_, ok := res.Msg.(LoginRes)
+	if !ok {
+		t.Fatal("decoded login message did not cast to its type")
 	}
 
 	if !bytes.Equal(res.Res, expectedRes) {

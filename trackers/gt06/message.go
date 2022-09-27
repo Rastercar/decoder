@@ -4,11 +4,10 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"reciever-ms/utils/arrays"
 	"reciever-ms/utils/crc"
-	dstrings "reciever-ms/utils/strings"
-	"strings"
 )
+
+var BYTES_NEEDED_TO_READ_PACKET_LEN = 3
 
 type Gt06MsgMeta struct {
 	Bytes              []byte // all bytes of the original message
@@ -23,8 +22,6 @@ type Gt06Msg struct {
 	InformationSerialNumber []byte // 2 bytes
 	ErrorCheck              []byte // 2 bytes
 }
-
-var BYTES_NEEDED_TO_READ_PACKET_LEN = 3
 
 func (d *Gt06MsgMeta) validateAndSetMessageSize() error {
 	originalMsgSize := len(d.Bytes)
@@ -81,7 +78,7 @@ func (m *Gt06MsgMeta) validateSelf() error {
 	return nil
 }
 
-func NewGt06Msg(packets []byte) (*Gt06Msg, error) {
+func NewMsg(packets []byte) (*Gt06Msg, error) {
 	m := Gt06MsgMeta{Bytes: packets}
 
 	if err := m.validateSelf(); err != nil {
@@ -97,40 +94,4 @@ func NewGt06Msg(packets []byte) (*Gt06Msg, error) {
 		InformationSerialNumber: packets[4+n : 6+n],
 		ErrorCheck:              packets[6+n : 8+n],
 	}, nil
-}
-
-type LoginRes struct {
-	Imei string `json:"imei"`
-}
-
-func (m *Gt06Msg) DecodeLogin() DecodeRes {
-	// always 5 in the login response
-	PACKET_LEN := []byte{0x05}
-
-	s := dstrings.BytesAsLiteralString(m.InformationContent)
-	imei := strings.TrimLeft(s, "0")
-
-	crcBytes := arrays.ConcatAppend([][]byte{
-		PACKET_LEN,
-		m.ProtocolNumber,
-		m.InformationSerialNumber,
-	})
-
-	errorCheck := crc.Crc16ItuToByteArr(crcBytes)
-
-	response := arrays.ConcatAppend([][]byte{
-		START_BIT,
-		PACKET_LEN,
-		m.ProtocolNumber,
-		m.InformationSerialNumber,
-		errorCheck,
-		STOP_BIT,
-	})
-
-	return DecodeRes{
-		Err:     nil,
-		Res:     response,
-		Msg:     LoginRes{Imei: imei},
-		MsgType: "LoginRes",
-	}
 }

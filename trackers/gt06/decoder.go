@@ -94,9 +94,8 @@ func (d *decoder) err(s string, a ...any) error {
 func (d *decoder) Decode(msg []byte) DecodeRes {
 	d.printfIfDebug("\ndecoding GT06 message")
 
-	m, err := NewGt06Msg(msg)
+	m, err := NewMsg(msg)
 	if err != nil {
-		d.printfIfDebug("\ndecoding failed: %v", err)
 		return DecodeRes{Err: d.err("decoding failed: %v", err)}
 	}
 
@@ -105,6 +104,8 @@ func (d *decoder) Decode(msg []byte) DecodeRes {
 	switch m.ProtocolNumber[0] {
 	case LOGIN_MESSAGE:
 		res = m.DecodeLogin()
+	case LOCATION_DATA:
+		res = m.DecodeLocation()
 	default:
 		res = DecodeRes{Err: d.err("cannot decode msg, unkown protocol %d", m.ProtocolNumber)}
 	}

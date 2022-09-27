@@ -19,18 +19,15 @@ func castDecodeRes[T any](d *gt06.DecodeRes) (*T, error) {
 
 // here we should have rastercar bussiness logic, such as publishing recieved positions to rmq, etc...
 func handleDecodedMsg(ctx context.Context, d *gt06.DecodeRes) {
+	_, span := tracer.NewSpan(ctx, "fn", "handleDecodedMsg")
+	defer span.End()
+
+	tracer.AddSpanTags(span, map[string]string{"msg_type": d.MsgType})
+
 	switch d.MsgType {
 	case "LocationRes":
 		// TODO:
 	}
-
-	// TODO: rm me
-	println("handle decoded")
-
-	_, span := tracer.NewSpan(ctx, "fn", "handleDecodedMsg")
-	defer span.End()
-
-	span.AddEvent("some event")
 }
 
 type Session struct {
