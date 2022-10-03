@@ -4,6 +4,9 @@ As the name suggests, decodes tracker requests, duh!
 
 ---
 
-Supported models
+Supported protocols
 
-- GTO6 (in progress)
+- GTO6
+    - login
+    - location packet
+    - ...

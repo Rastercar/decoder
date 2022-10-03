@@ -2,20 +2,18 @@ package tcp
 
 import (
 	"net"
-	"reciever-ms/trackers/gt06"
 )
 
-var (
-	decoder                       = gt06.NewDecoder(true)
-	MAX_INVALID_MESSAGES_PER_CONN = 10
-)
+var MAX_INVALID_MESSAGES_PER_CONN = 10
+
+func handlePackets(packets []byte) ([]byte, error) {
+	return nil, nil
+}
 
 // HandleRequest deals with the connection between tracker and decoder,
 // listening to tracker packets until the connection is dropped or the
 // too many invalid packets are recieved.
 func HandleRequest(c net.Conn) {
-	s := Session{Imei: "", InvalidMsgCnt: 0}
-
 	for {
 		buf := make([]byte, 1024)
 		n, err := c.Read(buf)
@@ -26,7 +24,8 @@ func HandleRequest(c net.Conn) {
 		}
 
 		req := buf[:n]
-		res, err := s.handlePackets(req)
+
+		res, err := handlePackets(req)
 
 		if err != nil {
 			c.Close()

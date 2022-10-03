@@ -1,4 +1,4 @@
-package gt06
+package decoder
 
 import (
 	"math"
@@ -143,7 +143,7 @@ func TestValidateSelf(t *testing.T) {
 	})
 }
 
-func TestNewMsg(t *testing.T) {
+func TestNew(t *testing.T) {
 	msg, err := NewMsg(loginMessage)
 	if err != nil {
 		t.Fatalf("unknonw error on valid message: %v", err)

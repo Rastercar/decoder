@@ -1,4 +1,4 @@
-package gt06
+package decoder
 
 import (
 	"encoding/binary"

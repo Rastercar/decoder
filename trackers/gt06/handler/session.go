@@ -1,14 +1,19 @@
-package tcp
+package handler
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"reciever-ms/tracer"
-	"reciever-ms/trackers/gt06"
+	"reciever-ms/trackers/gt06/decoder"
 )
 
-func castDecodeRes[T any](d *gt06.DecodeRes) (*T, error) {
+var (
+	dec                           = decoder.NewDecoder(true)
+	MAX_INVALID_MESSAGES_PER_CONN = 10
+)
+
+func castDecodeRes[T any](d *decoder.DecodeRes) (*T, error) {
 	cast, ok := d.Msg.(T)
 	if !ok {
 		return nil, fmt.Errorf("failed to cast message of type %s", d.MsgType)
@@ -18,7 +23,7 @@ func castDecodeRes[T any](d *gt06.DecodeRes) (*T, error) {
 }
 
 // here we should have rastercar bussiness logic, such as publishing recieved positions to rmq, etc...
-func handleDecodedMsg(ctx context.Context, d *gt06.DecodeRes) {
+func handleDecodedMsg(ctx context.Context, d *decoder.DecodeRes) {
 	_, span := tracer.NewSpan(ctx, "fn", "handleDecodedMsg")
 	defer span.End()
 
@@ -45,7 +50,7 @@ func (s *Session) handlePackets(packets []byte) (res []byte, err error) {
 		tracer.AddSpanTags(span, map[string]string{"imei": s.Imei})
 	}
 
-	decRes := decoder.Decode(packets)
+	decRes := dec.Decode(packets)
 	if decRes.Err != nil {
 		s.InvalidMsgCnt++
 
@@ -63,7 +68,7 @@ func (s *Session) handlePackets(packets []byte) (res []byte, err error) {
 	tracer.AddSpanTags(span, map[string]string{"msg_type": decRes.MsgType})
 
 	if decRes.MsgType == "LoginRes" {
-		r, err := castDecodeRes[gt06.LoginRes](&decRes)
+		r, err := castDecodeRes[decoder.LoginRes](&decRes)
 		if err != nil {
 			return nil, err
 		}

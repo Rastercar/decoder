@@ -7,6 +7,7 @@ import (
 	"os"
 	"reciever-ms/tcp"
 	"reciever-ms/tracer"
+	gt06 "reciever-ms/trackers/gt06/handler"
 )
 
 func startTracer() {
@@ -27,7 +28,8 @@ func main() {
 	startTracer()
 	defer tracer.Stop(ctx)
 
-	err := tcp.Listen("localhost:3003", tcp.HandleRequest)
+	err := tcp.Listen(":3003", gt06.HandleRequest)
+
 	if err != nil {
 		fmt.Printf("\n[SERVER] Failed to start: %v", err)
 		os.Exit(1)

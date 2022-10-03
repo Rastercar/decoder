@@ -1,4 +1,4 @@
-package tcp
+package handler
 
 import (
 	"net"
@@ -35,6 +35,4 @@ func TestHandleRequest(t *testing.T) {
 
 		HandleRequest(server)
 	})
-
-	// TODO: make a test that verifies other messages are only accepted after login
 }
