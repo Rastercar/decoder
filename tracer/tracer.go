@@ -3,6 +3,7 @@ package tracer
 import (
 	"context"
 	"log"
+	"reciever-ms/config"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -16,15 +17,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-type Config struct {
-	ServiceName    string
-	ExportEndpoint string
-}
-
 var tp *tracesdk.TracerProvider
 
-func SetGlobalTracer(c *Config) error {
-	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(c.ExportEndpoint)))
+func Start(c *config.TracerConfig) error {
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(c.Url)))
 	if err != nil {
 		return err
 	}

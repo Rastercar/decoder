@@ -1,11 +1,16 @@
 package decoder
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
+	"reciever-ms/config"
+	"reciever-ms/tracer"
 	dstrings "reciever-ms/utils/strings"
 	"strings"
+
+	"go.opentelemetry.io/otel/attribute"
 )
 
 var (
@@ -48,23 +53,29 @@ type DecodeResult struct {
 	MsgType string      // Name of the struct with the decoded message based on the msg protocol num
 }
 
-type decoder struct {
-	debug bool
+type Decoder struct {
+	cfg *config.Config
 }
 
-func (d *decoder) logIfDebug(s string, a ...any) {
-	if d.debug {
+func (d *Decoder) logIfDebug(s string, a ...any) {
+	if d.cfg.App.Debug {
 		log.Printf(s, a...)
 	}
 }
 
-func New(debug bool) decoder {
-	return decoder{debug}
+func New(cfg *config.Config) Decoder {
+	return Decoder{cfg}
 }
 
-func (d *decoder) Decode(b []byte) (*DecodeResult, error) {
+func (d *Decoder) Decode(ctx context.Context, b []byte) (*DecodeResult, error) {
+	_, span := tracer.NewSpan(ctx, "decoder", "Decode")
+	defer span.End()
+
 	s := string(b)
 	d.logIfDebug(s)
+
+	span.SetAttributes(attribute.Key("msg_str").String(s))
+	span.SetAttributes(attribute.Key("msg_hex").String(fmt.Sprintf("%x", b)))
 
 	s = dstrings.GetStringInBetween(s, "*HQ,", "#")
 	if s == "" {
@@ -78,6 +89,8 @@ func (d *decoder) Decode(b []byte) (*DecodeResult, error) {
 
 	cmd := parts[1]
 
+	span.SetAttributes(attribute.Key("msg_type").String(cmd))
+
 	switch cmd {
 	case MSG_HEARTBEAT:
 	case MSG_HEARTBEAT_V2:
@@ -90,7 +103,7 @@ func (d *decoder) Decode(b []byte) (*DecodeResult, error) {
 	return nil, fmt.Errorf("unknown command/msg type: %s", cmd)
 }
 
-func (d *decoder) decodeHeartbeat(parts []string) (*DecodeResult, error) {
+func (d *Decoder) decodeHeartbeat(parts []string) (*DecodeResult, error) {
 	if len(parts) == 0 {
 		return nil, errors.New("cant decode heartbeat packet with no parts")
 	}
@@ -102,7 +115,7 @@ func (d *decoder) decodeHeartbeat(parts []string) (*DecodeResult, error) {
 	}, nil
 }
 
-func (d *decoder) decodeLocation(parts []string) (*DecodeResult, error) {
+func (d *Decoder) decodeLocation(parts []string) (*DecodeResult, error) {
 	packet, err := PacketFromParts(parts)
 	if err != nil {
 		return nil, err

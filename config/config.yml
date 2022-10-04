@@ -1,0 +1,19 @@
+# The default microservice configuration, security credentials should be
+# set with enviroment variables, every key on this config has a env var
+# equivalent that sets or overrides the config on this file.
+#
+# Commented properties on this file are sensitive and should be set only
+# by the their env var equivalent, in development they can be hardcoded
+# within the config.dev.yml file
+
+app:
+  debug: false                              # APP_DEBUG
+  max_invalid_packets: 50                   # MAX_INVALID_PACKETS
+
+rmq:
+  # url:                                    # RMQ_URL
+  queue: "tracker"                          # RMQ_QUEUE
+
+tracer:
+  url: "http://localhost:14268/api/traces"  # JAEGER_URL
+  service_name: "tracker_reciever"          # SERVICE_NAME
