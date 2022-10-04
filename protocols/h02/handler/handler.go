@@ -2,13 +2,10 @@ package tcp
 
 import (
 	"net"
+	"reciever-ms/protocols/h02/decoder"
 )
 
-var MAX_INVALID_MESSAGES_PER_CONN = 10
-
-func handlePackets(packets []byte) ([]byte, error) {
-	return nil, nil
-}
+var dec = decoder.New(true)
 
 // HandleRequest deals with the connection between tracker and decoder,
 // listening to tracker packets until the connection is dropped or the
@@ -25,15 +22,16 @@ func HandleRequest(c net.Conn) {
 
 		req := buf[:n]
 
-		res, err := handlePackets(req)
+		_, err = dec.Decode(req)
 
 		if err != nil {
 			c.Close()
 			break
 		}
 
-		if res != nil {
-			c.Write(res)
-		}
+		// TODO: FIXME
+		// if res != nil {
+		// 	c.Write(res)
+		// }
 	}
 }

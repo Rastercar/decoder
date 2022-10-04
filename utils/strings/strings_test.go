@@ -34,3 +34,56 @@ func TestBytesAsLiteralString(t *testing.T) {
 		}
 	}
 }
+
+func TestGetStringsBetween(t *testing.T) {
+	s := "abc"
+	e := "xyz"
+
+	t.Run("finds strings in between", func(t *testing.T) {
+		x := "something before" + s + "find me !" + e + "something after"
+
+		if GetStringInBetween(x, s, e) != "find me !" {
+			t.Fail()
+		}
+	})
+
+	t.Run("returns empty string if start is not found", func(t *testing.T) {
+		x := "i dont contain start but have end" + e
+
+		if GetStringInBetween(x, s, e) != "" {
+			t.Fail()
+		}
+	})
+
+	t.Run("returns empty string if end is not found", func(t *testing.T) {
+		x := s + "i dont contain end but have start"
+
+		if GetStringInBetween(x, s, e) != "" {
+			t.Fail()
+		}
+	})
+
+	t.Run("returns empty string if neither is found", func(t *testing.T) {
+		x := "i dont contain end nor start"
+
+		if GetStringInBetween(x, s, e) != "" {
+			t.Fail()
+		}
+	})
+
+	t.Run("returns the first string in between on multiple occourances", func(t *testing.T) {
+		x := s + "occourance_1" + e + "meh" + s + "occourance_2" + e
+
+		if GetStringInBetween(x, s, e) != "occourance_1" {
+			t.Fail()
+		}
+	})
+
+	t.Run("succeds even if start and end are equal", func(t *testing.T) {
+		x := s + "meh" + s
+
+		if GetStringInBetween(x, s, s) != "meh" {
+			t.Fail()
+		}
+	})
+}

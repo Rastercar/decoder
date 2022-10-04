@@ -15,7 +15,7 @@ func Listen(address string, handler ReqHandler) error {
 
 	defer listener.Close()
 
-	fmt.Printf("Listening on %s", address)
+	fmt.Printf("Listening on %s\n", address)
 
 	for {
 		conn, err := listener.Accept()
