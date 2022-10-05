@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"reciever-ms/config"
-	h02 "reciever-ms/protocols/h02/handler"
+	h02 "reciever-ms/protocol/h02/handler"
 	"reciever-ms/server"
 	"reciever-ms/tracer"
 )
