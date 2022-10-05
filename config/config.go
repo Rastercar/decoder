@@ -12,13 +12,14 @@ type AppConfig struct {
 }
 
 type TracerConfig struct {
-	Url         string `env-required:"true" yaml:"url" env:"TRACER_ENDPOINT"`
-	ServiceName string `env-required:"true" yaml:"service_name" env:"SERVICE_NAME"`
+	Url         string `env-required:"true" yaml:"url" env:"TRACER_URL"`
+	ServiceName string `env-required:"true" yaml:"service_name" env:"TRACER_SERVICE_NAME"`
 }
 
 type RmqConfig struct {
-	Url   string `env-required:"true" yaml:"url" env:"RMQ_URL"`
-	Queue string `env-required:"true" yaml:"queue" env:"RMQ_QUEUE"`
+	Url               string `env-required:"true" yaml:"url" env:"RMQ_URL"`
+	Exchange          string `env-required:"true" yaml:"exchange" env:"RMQ_EXCHANGE"`
+	ReconnectWaitTime int    `env-required:"true" yaml:"reconnect_wait_time" env:"RMQ_RECONNECT_WAIT_TIME"`
 }
 
 type Config struct {

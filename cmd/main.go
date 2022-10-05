@@ -5,6 +5,7 @@ import (
 	"log"
 	"reciever-ms/config"
 	h02 "reciever-ms/protocol/h02/handler"
+	"reciever-ms/queue"
 	"reciever-ms/server"
 	"reciever-ms/tracer"
 )
@@ -22,8 +23,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("[TRACER] failed to init tracer: %v", err)
 	}
-
 	defer tracer.Stop(ctx)
+
+	queue := queue.New(cfg.Rmq)
+	queue.Start()
+	defer queue.Stop()
 
 	h02Handler := h02.New(cfg)
 

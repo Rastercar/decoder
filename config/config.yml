@@ -12,8 +12,9 @@ app:
 
 rmq:
   # url:                                    # RMQ_URL
-  queue: "tracker"                          # RMQ_QUEUE
+  exchange: "tracker_events_topic"          # RMQ_EXCHANGE
+  reconnect_wait_time: 5                    # RMQ_RECONNECT_WAIT_TIME
 
 tracer:
-  url: "http://localhost:14268/api/traces"  # JAEGER_URL
-  service_name: "tracker_reciever"          # SERVICE_NAME
+  url: "http://localhost:14268/api/traces"  # TRACER_URL
+  service_name: "tracker_reciever"          # TRACER_SERVICE_NAME

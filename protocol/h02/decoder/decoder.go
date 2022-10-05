@@ -110,7 +110,7 @@ func (d *Decoder) decodeHeartbeat(parts []string) (*protocol.DecodeResult, error
 		Res: nil,
 		Evt: &queue.TrackerEvent{
 			Imei: imei,
-			Type: "h02:HeartbeatMsg",
+			Type: "h02:Heartbeat",
 			Data: HeartbeatMsg{Imei: imei},
 		},
 	}, nil

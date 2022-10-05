@@ -95,16 +95,19 @@ func (h *Handler) sendTrackerEvent(ctx context.Context, evt queue.TrackerEvent) 
 	defer span.End()
 
 	switch evt.Type {
-	case "LocationMsg":
-	case "HeartbeatMsg":
-		body, err := json.Marshal(evt.Data)
+	case "h02:Location":
+		body, err := json.Marshal(evt)
 		if err != nil {
 			tracer.AddSpanErrorAndFail(span, err, "json marshal error")
+			return
 		}
 
 		// TODO: RM
 		// RMQ publish ?
 		spew.Dump(body)
+
+	case "h02:Heartbeat":
+		return
 
 	default:
 		span.SetStatus(codes.Error, fmt.Sprintf("unknown event type: %s", evt.Type))

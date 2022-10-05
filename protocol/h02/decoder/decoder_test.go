@@ -55,7 +55,7 @@ func TestDecode(t *testing.T) {
 			t.Fatalf("unexpected err %v", err)
 		}
 
-		if res.Evt.Type != "h02:LocationMsg" {
+		if res.Evt.Type != "h02:Location" {
 			t.Fatal("invalid msg type")
 		}
 

@@ -111,7 +111,7 @@ func (m *Packet) ParseToLocationMsg() (*protocol.DecodeResult, error) {
 	return &protocol.DecodeResult{
 		Res: nil,
 		Evt: &queue.TrackerEvent{
-			Type: "h02:LocationMsg",
+			Type: "h02:Location",
 			Data: LocationMsg{
 				Lat:       lat,
 				Lng:       lng,
