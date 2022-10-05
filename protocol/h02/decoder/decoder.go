@@ -7,6 +7,7 @@ import (
 	"log"
 	"reciever-ms/config"
 	"reciever-ms/protocol"
+	"reciever-ms/queue"
 	"reciever-ms/tracer"
 	dstrings "reciever-ms/utils/strings"
 	"strings"
@@ -103,10 +104,15 @@ func (d *Decoder) decodeHeartbeat(parts []string) (*protocol.DecodeResult, error
 		return nil, errors.New("cant decode heartbeat packet with no parts")
 	}
 
+	imei := parts[0]
+
 	return &protocol.DecodeResult{
-		Res:     nil,
-		Msg:     HeartbeatMsg{Imei: parts[0]},
-		MsgType: "HeartbeatMsg",
+		Res: nil,
+		Evt: &queue.TrackerEvent{
+			Imei: imei,
+			Type: "h02:HeartbeatMsg",
+			Data: HeartbeatMsg{Imei: imei},
+		},
 	}, nil
 }
 

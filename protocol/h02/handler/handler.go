@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -9,8 +10,10 @@ import (
 	"reciever-ms/config"
 	"reciever-ms/protocol"
 	"reciever-ms/protocol/h02/decoder"
+	"reciever-ms/queue"
 	"reciever-ms/tracer"
 
+	"github.com/davecgh/go-spew/spew"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 )
@@ -80,22 +83,30 @@ func (h *Handler) handlePackets(ctx context.Context, packets []byte) (*protocol.
 		tracer.AddSpanErrorAndFail(span, err, "decode failed")
 	}
 
-	if res != nil {
-		go h.handleDecodedMessage(ctx, res)
+	if res != nil && res.Evt != nil {
+		go h.sendTrackerEvent(ctx, *res.Evt)
 	}
 
 	return res, err
 }
 
-func (h *Handler) handleDecodedMessage(ctx context.Context, res *protocol.DecodeResult) {
+func (h *Handler) sendTrackerEvent(ctx context.Context, evt queue.TrackerEvent) {
 	_, span := tracer.NewSpan(ctx, "handler", "handleDecodedMessage")
-	span.AddEvent("some event !")
-
-	switch res.MsgType {
-	case "LocationMsg":
-
-	case "HeartbeatMsg":
-	}
-
 	defer span.End()
+
+	switch evt.Type {
+	case "LocationMsg":
+	case "HeartbeatMsg":
+		body, err := json.Marshal(evt.Data)
+		if err != nil {
+			tracer.AddSpanErrorAndFail(span, err, "json marshal error")
+		}
+
+		// TODO: RM
+		// RMQ publish ?
+		spew.Dump(body)
+
+	default:
+		span.SetStatus(codes.Error, fmt.Sprintf("unknown event type: %s", evt.Type))
+	}
 }

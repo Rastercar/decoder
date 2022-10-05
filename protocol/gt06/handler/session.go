@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"reciever-ms/protocols/gt06/decoder"
+	"reciever-ms/protocol/gt06/decoder"
 	"reciever-ms/tracer"
 )
 

@@ -55,11 +55,11 @@ func TestDecode(t *testing.T) {
 			t.Fatalf("unexpected err %v", err)
 		}
 
-		if res.MsgType != "LocationMsg" {
+		if res.Evt.Type != "h02:LocationMsg" {
 			t.Fatal("invalid msg type")
 		}
 
-		msg := res.Msg.(LocationMsg)
+		msg := res.Evt.Data.(LocationMsg)
 
 		if msg.Imei != "867232051148352" {
 			t.Fatal("invalid imei")

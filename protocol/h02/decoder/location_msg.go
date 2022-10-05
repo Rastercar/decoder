@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reciever-ms/protocol"
+	"reciever-ms/queue"
 	"strconv"
 	"time"
 )
@@ -107,19 +108,20 @@ func (m *Packet) ParseToLocationMsg() (*protocol.DecodeResult, error) {
 		return nil, err
 	}
 
-	msg := LocationMsg{
-		Lat:       lat,
-		Lng:       lng,
-		Imei:      m.Imei,
-		Speed:     speed,
-		Direction: direction,
-		Timestamp: timestamp,
-		Status:    *status,
-	}
-
 	return &protocol.DecodeResult{
-		Res:     nil,
-		Msg:     msg,
-		MsgType: "LocationMsg",
+		Res: nil,
+		Evt: &queue.TrackerEvent{
+			Type: "h02:LocationMsg",
+			Data: LocationMsg{
+				Lat:       lat,
+				Lng:       lng,
+				Imei:      m.Imei,
+				Speed:     speed,
+				Direction: direction,
+				Timestamp: timestamp,
+				Status:    *status,
+			},
+			Imei: m.Imei,
+		},
 	}, nil
 }
