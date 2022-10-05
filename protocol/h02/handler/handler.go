@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -13,7 +12,6 @@ import (
 	"reciever-ms/queue"
 	"reciever-ms/tracer"
 
-	"github.com/davecgh/go-spew/spew"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 )
@@ -21,10 +19,15 @@ import (
 type Handler struct {
 	cfg *config.Config
 	dec decoder.Decoder
+	rmq *queue.Server
 }
 
-func New(cfg *config.Config) Handler {
-	return Handler{cfg: cfg, dec: decoder.New(cfg)}
+func New(cfg *config.Config, rmq *queue.Server) Handler {
+	return Handler{
+		cfg: cfg,
+		rmq: rmq,
+		dec: decoder.New(cfg),
+	}
 }
 
 // deals with the connection between tracker and decoder, listening to tracker packets
@@ -91,22 +94,15 @@ func (h *Handler) handlePackets(ctx context.Context, packets []byte) (*protocol.
 }
 
 func (h *Handler) sendTrackerEvent(ctx context.Context, evt queue.TrackerEvent) {
-	_, span := tracer.NewSpan(ctx, "handler", "handleDecodedMessage")
+	ctx, span := tracer.NewSpan(ctx, "handler", "handleDecodedMessage")
 	defer span.End()
 
 	switch evt.Type {
-	case "h02:Location":
-		body, err := json.Marshal(evt)
-		if err != nil {
-			tracer.AddSpanErrorAndFail(span, err, "json marshal error")
-			return
-		}
+	case "location":
+		h.rmq.PublishTrackerEvent(ctx, evt)
 
-		// TODO: RM
-		// RMQ publish ?
-		spew.Dump(body)
-
-	case "h02:Heartbeat":
+	case "heartbeat":
+		span.AddEvent(fmt.Sprintf("skipping publishing for event of type: %s", evt.Type))
 		return
 
 	default:

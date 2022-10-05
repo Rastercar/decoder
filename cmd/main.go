@@ -29,7 +29,7 @@ func main() {
 	queue.Start()
 	defer queue.Stop()
 
-	h02Handler := h02.New(cfg)
+	h02Handler := h02.New(cfg, &queue)
 
 	err = server.Listen(":3003", h02Handler.HandleRequest)
 	if err != nil {

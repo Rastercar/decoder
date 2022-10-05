@@ -12,9 +12,13 @@ type AmqpConnectionWrapper struct {
 	conn *amqp.Connection
 }
 
-func (w AmqpConnectionWrapper) Close() error { return w.conn.Close() }
+func (w AmqpConnectionWrapper) Close() error {
+	return w.conn.Close()
+}
 
-func (w AmqpConnectionWrapper) Channel() (interfaces.AmqpChannel, error) { return w.conn.Channel() }
+func (w AmqpConnectionWrapper) Channel() (interfaces.AmqpChannel, error) {
+	return w.conn.Channel()
+}
 
 type Connector struct{}
 
@@ -55,8 +59,6 @@ func (s *Server) connect() {
 			continue
 		}
 
-		// Its intentional to panic here as we NEED the queues and exchanges
-		// to be successfully declared for this service to function correctly
 		err = channel.ExchangeDeclare(
 			s.cfg.Exchange, // name
 			"topic",        // kind
@@ -66,6 +68,9 @@ func (s *Server) connect() {
 			false,          // no-wait
 			nil,            // args
 		)
+
+		// Its intentional to panic here as we NEED the queues and exchanges
+		// to be successfully declared for this service to function correctly
 		if err != nil {
 			log.Fatalf("[RMQ] failed to declare exchange: %v ", err)
 		}
@@ -73,9 +78,10 @@ func (s *Server) connect() {
 		s.conn = con
 		s.channel = channel
 
-		s.notifyClose = make(chan *amqp.Error)
+		s.notifyClose = make(chan *amqp.Error, 1024)
 		s.channel.NotifyClose(s.notifyClose)
 
 		log.Printf("[RMQ] connected")
+		return
 	}
 }

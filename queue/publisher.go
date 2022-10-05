@@ -9,7 +9,7 @@ import (
 
 type Publisher struct{}
 
-func (p *Publisher) PublishWithContext(channel interfaces.AmqpChannel, ctx context.Context, exchange, key string, msg amqp.Publishing) error {
+func (p *Publisher) PublishWithContext(ctx context.Context, channel interfaces.AmqpChannel, exchange, key string, msg amqp.Publishing) error {
 	return channel.PublishWithContext(
 		ctx,      // context
 		exchange, // exchange

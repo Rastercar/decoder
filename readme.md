@@ -24,6 +24,14 @@ with `make run_dev` or `go run cmd/main.go --config-file="./config/config.dev.ym
 | TRACER_URL              | jaeger endpoint to send traces to                                            | http://localhost:14268/api/traces |
 | TRACER_SERVICE_NAME     | name of the service to jaeger                                                | tracker_reciever                  |
 
+## Rabbitmq
+
+Tracker events are published to a single topic exchange with the following pattern <protocol_slug>.<event_type>.<device_imei>. eg: h02.location.imei. With this topic exchange your services can listen to events only they care about, examples:
+
+- all event types of the h02 protocol `h02.*.*`
+- location events regardless of the protocol and imei`*.location.*`
+- events of a specific tracker, by its imei `*.*.8603412412412`
+
 ## Supported protocols / messages
 
 - h02

@@ -9,8 +9,8 @@ import (
 //go:generate mockgen -destination=../../mocks/server.go -package=mocks . IServer,AmqpChannel,AmqpConnection,Connector,Publisher
 
 type AmqpChannel interface {
-	ExchangeDeclare(name, kind string, durable, autoDelete, internal, noWait bool, args amqp.Table) error
 	NotifyClose(c chan *amqp.Error) chan *amqp.Error
+	ExchangeDeclare(name, kind string, durable, autoDelete, internal, noWait bool, args amqp.Table) error
 	PublishWithContext(ctx context.Context, exchange, key string, mandatory, immediate bool, msg amqp.Publishing) error
 }
 
@@ -26,13 +26,12 @@ type Connector interface {
 }
 
 type Publisher interface {
-	PublishWithContext(channel AmqpChannel, ctx context.Context, exchange, key string, msg amqp.Publishing) error
+	PublishWithContext(ctx context.Context, channel AmqpChannel, exchange, key string, msg amqp.Publishing) error
 }
 
 type IServer interface {
 	Connector
 	Publisher
 
-	ServeDelivery(d *amqp.Delivery)
-	Shutdown() error
+	Stop() error
 }

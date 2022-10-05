@@ -109,9 +109,10 @@ func (d *Decoder) decodeHeartbeat(parts []string) (*protocol.DecodeResult, error
 	return &protocol.DecodeResult{
 		Res: nil,
 		Evt: &queue.TrackerEvent{
-			Imei: imei,
-			Type: "h02:Heartbeat",
-			Data: HeartbeatMsg{Imei: imei},
+			Imei:     imei,
+			Type:     "heartbeat",
+			Protocol: "h02",
+			Data:     HeartbeatMsg{Imei: imei},
 		},
 	}, nil
 }
