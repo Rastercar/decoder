@@ -29,36 +29,9 @@ with `make run_dev` or `go run cmd/main.go --config-file="./config/config.dev.ym
 Tracker events are published to a single topic exchange with the following pattern <protocol_slug>.<event_type>.<device_imei>. eg: h02.location.imei. With this topic exchange your services can listen to events only they care about, examples:
 
 - all event types of the h02 protocol `h02.*.*`
-- location events regardless of the protocol and imei`*.location.*`
+- location events regardless of the protocol and imei `*.location.*`
 - events of a specific tracker, by its imei `*.*.8603412412412`
 
 ## Supported protocols / messages
 
-- h02
-    - *Uplink*
-    - ✅ heartbeat
-    - ✅ real time location
-    - ❌ location request
-    - ❌ blind spots uploading
-    - ❌ device alarm 
-    - *Downlink*
-    - ❌ cut-off/recover oil and engine 
-    - ❌ response to location request
-    - ❌ fortification (SF)
-    - ❌ fortification (SF2)
-    - ❌ disarming (CF)
-    - ❌ disarming (CF2)
-    - ❌ main number bind (UR)
-    - ❌ server setting (IP)
-    - ❌ terminal password setting
-    - ❌ interval settings
-    - ❌ allarm setting
-    - ❌ device reboot
-    - ❌ reset to defaults
-    - ❌ network access point
-    - ❌ answer mode
-    - ❌ IMEI setting
-    - ❌ language setting
-    - ❌ audiomonitor
-    - ❌ query device information
-    - ❌ working mode setting
+[h02](protocol/h02/doc/events.md)

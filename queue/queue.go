@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -50,6 +51,16 @@ func (s *Server) Start() {
 	}()
 }
 
+func (s *Server) Stop() error {
+	log.Printf("[RMQ] closing connections")
+
+	if s.conn != nil {
+		return s.conn.Close()
+	}
+
+	return nil
+}
+
 func (s *Server) PublishTrackerEvent(ctx context.Context, evt TrackerEvent) error {
 	ctx, span := tracer.NewSpan(ctx, "queue", "PublishTrackerEvent")
 	defer span.End()
@@ -69,20 +80,12 @@ func (s *Server) PublishTrackerEvent(ctx context.Context, evt TrackerEvent) erro
 
 	routingKey := strings.Join([]string{evt.Protocol, evt.Type, evt.Imei}, ".")
 
+	span.SetAttributes(attribute.String("routing_key", routingKey))
+
 	err = s.Publisher.PublishWithContext(ctx, s.channel, s.cfg.Exchange, routingKey, amqp.Publishing{Body: body})
 	if err != nil {
 		tracer.AddSpanErrorAndFail(span, err, "failed to publish tracker event")
 	}
 
 	return err
-}
-
-func (s *Server) Stop() error {
-	log.Printf("[RMQ] closing connections")
-
-	if s.conn != nil {
-		return s.conn.Close()
-	}
-
-	return nil
 }
