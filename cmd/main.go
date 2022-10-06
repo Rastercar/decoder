@@ -10,6 +10,17 @@ import (
 	"reciever-ms/tracer"
 )
 
+// The mailer version/build, this gets replaced at build time to the commit SHA
+// with the use of linker flags. see the ldfflags on the makefile go build command
+
+var version = "development"
+var build = "development"
+
+func init() {
+	log.Println("[GIT] build:   ", build)
+	log.Println("[GIT] version: ", version)
+}
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

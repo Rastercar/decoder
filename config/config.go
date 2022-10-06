@@ -38,9 +38,5 @@ func Parse() (*Config, error) {
 		return nil, err
 	}
 
-	if err := cleanenv.ReadEnv(cfg); err != nil {
-		return nil, err
-	}
-
 	return cfg, nil
 }

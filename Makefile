@@ -6,11 +6,8 @@ PROJECT_NAME = reciever_ms
 CMD_DIR = ./cmd
 
 BIN_FILE = ./bin/$(PROJECT_NAME)
-
 CONFIG_FILE = ./config/config.yml
-
 DEV_CONFIG_FILE = ./config/config.dev.yml
-
 
 # Get version constant
 VERSION := $(shell git describe --abbrev=0 --tags --always)
@@ -18,8 +15,6 @@ BUILD := $(shell git rev-parse HEAD)
 
 # Use linker flags to provide version/build settings to the binary
 LDFLAGS=-ldflags "-s -w -X=main.version=$(VERSION) -X=main.build=$(BUILD)"
-
-default: get build
 
 # Fetch dependencies
 get:
@@ -50,3 +45,22 @@ run: build
 # Builds and runs the aplication on development mode
 run_dev: build
 	$(BIN_FILE) -config-file=$(DEV_CONFIG_FILE)
+
+# Builds the microservice image
+docker_build:
+	docker build -f ./docker/Dockerfile .
+
+# ------- DOCKERFILE SPECIFIC COMMANDS
+
+# Copy the files necessary to execute the built binary
+# (made to be used within a alpine docker image) 
+install:
+	mkdir -p /etc/$(PROJECT_NAME)/
+	cp $(BIN_FILE) /usr/local/bin/
+	cp $(CONFIG_FILE) /etc/
+	cp $(DEV_CONFIG_FILE) /etc/
+
+# Clears all the files necessary to execute the built binary
+uninstall:
+	rm -rf /usr/local/bin/$(BIN_FILE)
+	rm -rf /etc/$(PROJECT_NAME)/
