@@ -3,4 +3,4 @@ config/config.dev.yml
 todo.txt
 tracker.txt
 
-bin/**
+bin/reciever_ms
