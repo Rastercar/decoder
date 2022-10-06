@@ -41,7 +41,7 @@ func (s *Server) Start() {
 			// connection error is nil and chanClosed is false when
 			// the connection was closed manually with client code
 			if connectionError != nil {
-				log.Printf("[RMQ] connection error: %v \n", connectionError)
+				log.Printf("[ RMQ ] connection error: %v \n", connectionError)
 			}
 
 			if !chanClosed {
@@ -52,7 +52,7 @@ func (s *Server) Start() {
 }
 
 func (s *Server) Stop() error {
-	log.Printf("[RMQ] closing connections")
+	log.Printf("[ RMQ ] closing connections")
 
 	if s.conn != nil {
 		return s.conn.Close()

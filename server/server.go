@@ -15,7 +15,7 @@ func Listen(address string, handler ReqHandler) error {
 
 	defer listener.Close()
 
-	log.Printf("[SERVER] listening on: %s\n", address)
+	log.Printf("[ TCP ] listening on: %s\n", address)
 
 	for {
 		conn, err := listener.Accept()

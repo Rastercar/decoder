@@ -36,12 +36,12 @@ func (s *Server) connect() {
 	sleepTime := time.Second * time.Duration(s.cfg.ReconnectWaitTime)
 
 	for {
-		log.Printf("[RMQ] trying to connect, attempt: %d", currentAttempt)
+		log.Printf("[ RMQ ] trying to connect, attempt: %d", currentAttempt)
 
 		con, err := s.Connector.Connect(s.cfg.Url)
 
 		if err != nil || con == nil {
-			log.Printf("[RMQ] connection failed %v", err)
+			log.Printf("[ RMQ ] connection failed %v", err)
 
 			currentAttempt++
 			time.Sleep(sleepTime)
@@ -51,7 +51,7 @@ func (s *Server) connect() {
 
 		channel, err := con.Channel()
 		if err != nil {
-			log.Printf("[RMQ] connection channel failed %v", err)
+			log.Printf("[ RMQ ] connection channel failed %v", err)
 
 			currentAttempt++
 			time.Sleep(sleepTime)
@@ -72,7 +72,7 @@ func (s *Server) connect() {
 		// Its intentional to panic here as we NEED the queues and exchanges
 		// to be successfully declared for this service to function correctly
 		if err != nil {
-			log.Fatalf("[RMQ] failed to declare exchange: %v ", err)
+			log.Fatalf("[ RMQ ] failed to declare exchange: %v ", err)
 		}
 
 		s.conn = con
@@ -81,7 +81,7 @@ func (s *Server) connect() {
 		s.notifyClose = make(chan *amqp.Error, 1024)
 		s.channel.NotifyClose(s.notifyClose)
 
-		log.Printf("[RMQ] connected")
+		log.Printf("[ RMQ ] connected")
 		return
 	}
 }

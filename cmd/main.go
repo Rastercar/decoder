@@ -17,8 +17,8 @@ var version = "development"
 var build = "development"
 
 func init() {
-	log.Println("[GIT] build:   ", build)
-	log.Println("[GIT] version: ", version)
+	log.Println("[ GIT ] build:   ", build)
+	log.Println("[ GIT ] version: ", version)
 }
 
 func main() {
@@ -44,6 +44,6 @@ func main() {
 
 	err = server.Listen(":3003", h02Handler.HandleRequest)
 	if err != nil {
-		log.Fatalf("[SERVER] Failed to start: %v", err)
+		log.Fatalf("[ TCP ] Failed to start: %v", err)
 	}
 }
