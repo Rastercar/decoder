@@ -46,9 +46,17 @@ run: build
 run_dev: build
 	$(BIN_FILE) -config-file=$(DEV_CONFIG_FILE)
 
-# Builds the microservice image
+# run the service as a container
+docker_run:
+	docker run reciever_ms:latest --config-file="/etc/config.dev.yml"
+
+# run the service as a container with the dev config file
+docker_run_dev:
+	docker run reciever_ms:latest --config-file="/etc/config.dev.yml"
+
+# build the service
 docker_build:
-	docker build -f ./docker/Dockerfile .
+	docker build -f ./docker/Dockerfile . -t reciever_ms
 
 # ------- DOCKERFILE SPECIFIC COMMANDS
 
