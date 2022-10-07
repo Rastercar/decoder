@@ -17,26 +17,23 @@ import (
 )
 
 type Handler struct {
-	cfg *config.Config
-	dec decoder.Decoder
 	rmq *queue.Server
+	cfg *config.Config
+	dec decoder.IDecoder
 }
 
 func New(cfg *config.Config, rmq *queue.Server) Handler {
-	return Handler{
-		cfg: cfg,
-		rmq: rmq,
-		dec: decoder.New(cfg),
-	}
+	dec := decoder.New(cfg)
+	return Handler{rmq, cfg, dec}
 }
 
 // deals with the connection between tracker and decoder, listening to tracker packets
 // until the connection is dropped or the too many invalid packets are recieved.
 func (h *Handler) HandleRequest(c net.Conn) {
 	ctx, span := tracer.NewSpan(context.TODO(), "handler", "HandleRequest")
-	span.SetAttributes(attribute.String("protocol", "h02"))
-
 	defer span.End()
+
+	span.SetAttributes(attribute.String("protocol", "h02"))
 
 	invalidPacketsCnt := 0
 

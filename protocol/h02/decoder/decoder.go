@@ -53,14 +53,20 @@ type Decoder struct {
 	cfg *config.Config
 }
 
+//go:generate mockgen -destination=../../../mocks/h02.go -package=mocks . IDecoder
+
+type IDecoder interface {
+	Decode(ctx context.Context, b []byte) (*protocol.DecodeResult, error)
+}
+
 func (d *Decoder) logIfDebug(s string, a ...any) {
 	if d.cfg.App.Debug {
 		log.Printf(s, a...)
 	}
 }
 
-func New(cfg *config.Config) Decoder {
-	return Decoder{cfg}
+func New(cfg *config.Config) *Decoder {
+	return &Decoder{cfg}
 }
 
 func (d *Decoder) Decode(ctx context.Context, b []byte) (*protocol.DecodeResult, error) {
